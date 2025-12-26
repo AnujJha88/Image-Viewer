@@ -1,4 +1,5 @@
 #include<SDL2/SDL.h>
+#include <SDL2/SDL_keycode.h>
 #include<stdio.h>
 #include<stdlib.h>
 
@@ -43,6 +44,28 @@ void apply_invert(SDL_Surface* surface,Image* img){
         pixels[i]=SDL_MapRGB(surface->format,r,g,b);
     }
 }
+
+void apply_brightness(SDL_Surface* surface, Image* img,int offset){
+
+    Uint32* pixels=(Uint32*)surface->pixels;
+
+    for(int i=0;i<img->w*img->h;i++){
+        Uint8 r=(Uint8)SDL_clamp(img->r[i]+offset,0,255);
+        Uint8 g=(Uint8)SDL_clamp(img->g[i]+offset,0,255);
+        Uint8 b=(Uint8)SDL_clamp(img->b[i]+offset,0,255);
+        pixels[i]=SDL_MapRGB(surface->format,r,g,b);
+    }
+}
+
+void apply_reset(SDL_Surface* surface, Image* curr, Image* orig){
+
+    Uint32* pixels=(Uint32*)surface->pixels;
+
+    for(int i=0;i<curr->w*curr->h;i++){
+        pixels[i]=SDL_MapRGB(surface->format,orig->r[i],orig->g[i],orig->b[i]);
+    }
+}
+
 
 int main(){
 
@@ -111,11 +134,14 @@ printf("width=%d, height=%d \n",width,height);
     //}
     //SDL_UpdateWindowSurface(window);
 
+    apply_reset(surface,&img,&orig);
+    SDL_UpdateWindowSurface(window);
+
     SDL_Event e;
     while(SDL_WaitEvent(&e)){
         if(e.type==SDL_QUIT) break;
 
-        if(e.type-SDL_KEYDOWN){
+        if(e.type==SDL_KEYDOWN){
             switch(e.key.keysym.sym){
                 case SDLK_i:
                 apply_invert(surface,&img);
@@ -123,7 +149,15 @@ printf("width=%d, height=%d \n",width,height);
                 case SDLK_g:
                 apply_grayscale(surface,&img);
                 break;
-
+                case SDLK_UP:
+                apply_brightness(surface,&img,5);
+                break;
+                case SDLK_DOWN:
+                apply_brightness(surface,&img,-5);
+                break;
+                case SDLK_r:
+                apply_reset(surface,&img,&orig);
+                break;
 
             }
         }

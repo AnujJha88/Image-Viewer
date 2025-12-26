@@ -164,4 +164,10 @@ printf("width=%d, height=%d \n",width,height);
 
         SDL_UpdateWindowSurface(window);
     }
+    free(img.r);
+    free(img.b);
+    free(img.g);
+    SDL_DestroyWindow(window);
+    SDL_Quit();
+    return 0;
 }
